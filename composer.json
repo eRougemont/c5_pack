@@ -1,0 +1,23 @@
+{
+    "name": "erougemont/c5_pack",
+    "description": "Pack TEI files for Concrete5",
+    "authors": [
+        {
+            "name": "Frédéric Glorieux",
+            "email": "frederic.glorieux@fictif.org"
+        }
+    ],
+    "type": "library",
+    "license": "BSD-3-Clause",
+    "require": {
+        "php": ">=7.2",
+        "oeuvres/kit": "dev-main",
+        "oeuvres/xsl": "dev-main"
+    },
+    "autoload": {
+        "psr-4": {
+            "Oeuvres\\Teinte\\": ""
+        }
+    },
+    "minimum-stability": "dev"
+}

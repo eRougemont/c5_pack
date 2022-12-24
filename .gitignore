@@ -1,0 +1,7 @@
+composer.phar
+/vendor/
+config.php
+composer.lock
+.ht*
+._*.php
+
