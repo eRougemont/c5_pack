@@ -55,6 +55,7 @@ class C5tei extends DashboardPageController
 
     public function load()
     {
+        // 
         // no reload ? should be OK ?
         $this->set('repos', $this->repos);
         $repo = $this->request->query->get('repo');
@@ -93,6 +94,12 @@ class C5tei extends DashboardPageController
             $xsl = 'c5_livres.xsl';
             $date = substr($filename, 3, 4);
         }
+        // 
+        $bookPage = \Page::getByPath($bookpath);
+        if($bookPage->isError()) {
+            throw new \Exception('Avant de charger ces textes, une page de couverture est nécessaire pour le chemin : '.$this->bookpath);
+        }
+
         $this->set('bookpath', $bookpath);
         $dom = Xt::loadXml($xml);
         if ($dom === null) {
@@ -113,9 +120,17 @@ class C5tei extends DashboardPageController
             $dom,
             array('package' => "c5tei", 'bookpath' => $bookpath)
         );
-        Log::info("Transformation");
+        Log::info("Transformé");
         // contenus de page à encadrer de CDATA 
         $cif = str_replace(array("<content>", "</content>"), array("<content><![CDATA[", "]]></content>"), $cif);
+        // avant d’inmporter, supprimer les pages existantes 
+        $pl = new \Concrete\Core\Page\PageList();
+        $pl->filterByPath($bookpath, true); // !!! true = do not delete parent
+        $pages = $pl->get();
+        foreach ($pages as $page) {
+            $page->delete();
+        }
+        Log::info("Nettoyé");
         // now load the $cif ?
         $ci = new ContentImporter();
         $ci->importContentString($cif);
@@ -146,7 +161,7 @@ class C5tei extends DashboardPageController
                 $blocks[0]->update($data);
             }
         }
-        Log::info("Chargement");
+        Log::info("Chargé");
     }
 
 
