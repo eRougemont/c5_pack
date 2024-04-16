@@ -5,7 +5,8 @@ namespace Concrete\Package\C5tei\Controller\SinglePage\Dashboard;
 use Concrete\Core\Backup\ContentImporter;
 use Concrete\Core\Page\Controller\DashboardPageController;
 
-use Oeuvres\Kit\{Log, LoggerMem, Xt};
+use Oeuvres\Kit\{Log, Xt};
+use Oeuvres\Kit\Logger\{LoggerMem};
 use Psr\Log\LogLevel;
 
 
@@ -14,9 +15,10 @@ use Psr\Log\LogLevel;
 class C5tei extends DashboardPageController
 {
     public $repos = [
-        'ddr_livres'=>[], 
+        'ddr_livres'=>[],
         'ddr_articles'=> [], 
-        'ddr_correspondances'=>[]
+        'ddr_inedits'=>[],
+        'ddr_correspondances'=>[],
     ];
     /** A token fo gh */
     private $ghtok;
@@ -61,7 +63,7 @@ class C5tei extends DashboardPageController
         $repo = $this->request->query->get('repo');
         $file = $this->request->query->get($repo);
         // be careful of "master", branch may change
-        $url = sprintf("https://raw.githubusercontent.com/eRougemont/%s/master/%s", $repo, $file);        
+        $url = sprintf("https://raw.githubusercontent.com/eRougemont/%s/master/%s", $repo, $file);
         Log::info($url);
         $xml = self::curl_get_contents($url);
 
@@ -80,15 +82,22 @@ class C5tei extends DashboardPageController
 
         $filename = pathinfo($file, PATHINFO_FILENAME);
 
-        if ($repo == "ddr_articles") {
+        if ($repo == "ddr_inedits") {
+            $bookname = substr($filename, 4);
+            $bookpath = "/inedits/$bookname";
+            $xsl = 'c5_articles.xsl';
+        }
+        else if ($repo == "ddr_articles") {
             $bookname = substr($filename, 4);
             $bookpath = "/articles/$bookname";
             $xsl = 'c5_articles.xsl';
-        } else if ($repo == "ddr_correspondances") {
+        }
+        else if ($repo == "ddr_correspondances") {
             $bookname = substr($filename, 9);
             $bookpath = "/correspondances/$bookname";
             $xsl = 'c5_correspondances.xsl';
-        } else if ($repo == "ddr_livres") {
+        }
+        else if ($repo == "ddr_livres") {
             $bookname = strtok($filename, '_');
             $bookpath = "/livres/$bookname";
             $xsl = 'c5_livres.xsl';
@@ -97,7 +106,7 @@ class C5tei extends DashboardPageController
         // 
         $bookPage = \Page::getByPath($bookpath);
         if($bookPage->isError()) {
-            throw new \Exception('Avant de charger ces textes, une page de couverture est nécessaire pour le chemin : '.$this->bookpath);
+            throw new \Exception('Avant de charger ces textes, une page de couverture est nécessaire pour le chemin : '.$bookpath);
         }
 
         $this->set('bookpath', $bookpath);
@@ -134,7 +143,7 @@ class C5tei extends DashboardPageController
         // now load the $cif ?
         $ci = new ContentImporter();
         $ci->importContentString($cif);
-
+        // specific design with toc
         if ($repo == "ddr_livres") {
             $bookPage = \Page::getByPath($bookpath);
             $toc_html = Xt::transformToXml(
