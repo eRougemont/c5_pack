@@ -83,7 +83,7 @@ class C5tei extends DashboardPageController
         $filename = pathinfo($file, PATHINFO_FILENAME);
 
         if ($repo == "ddr_inedits") {
-            $bookname = substr($filename, 4);
+            $bookname = $filename;
             $bookpath = "/inedits/$bookname";
             $xsl = 'c5_articles.xsl';
         }
