@@ -22,7 +22,6 @@ $add_views = array('add','edit','save');
 
     <div>
     <?php
-    // $bookPage = Page::getByPath("/correspondances/corbin");
     echo $form->label('repo', 'Entrepôt');
     $opts = array_merge([''], array_keys($repos));
     $opts = array_combine($opts, $opts);

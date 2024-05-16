@@ -85,7 +85,12 @@ class C5tei extends DashboardPageController
         if ($repo == "ddr_inedits") {
             $bookname = $filename;
             $bookpath = "/inedits/$bookname";
-            $xsl = 'c5_articles.xsl';
+            // BIG emmerde
+            if ($filename == 'ddr19630100cofr') {
+                $xsl = 'c5_livres.xsl';
+            } else {
+                $xsl = 'c5_articles.xsl';
+            }
         }
         else if ($repo == "ddr_articles") {
             $bookname = substr($filename, 4);
@@ -144,7 +149,7 @@ class C5tei extends DashboardPageController
         $ci = new ContentImporter();
         $ci->importContentString($cif);
         // specific design with toc
-        if ($repo == "ddr_livres") {
+        if ($repo == "ddr_livres" || $filename == 'ddr19630100cofr') {
             $bookPage = \Page::getByPath($bookpath);
             $toc_html = Xt::transformToXml(
                 $this->xsl_dir . 'c5_toc.xsl',
